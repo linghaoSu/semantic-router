@@ -1,0 +1,25 @@
+
+/* ------------------------------------------------------------------ */
+/*  Flow Diagram                                                       */
+/* ------------------------------------------------------------------ */
+
+.flowContainer {
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+}
+
+.flowSvg {
+  width: 100%;
+  max-height: 360px;
+}
+
+.flowNode rect {
+  transition: fill-opacity 0.2s ease;
+}
+
+.flowNode:hover rect {
+  fill-opacity: 0.35;
+}

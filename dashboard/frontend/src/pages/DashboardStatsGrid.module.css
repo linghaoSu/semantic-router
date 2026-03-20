@@ -1,0 +1,104 @@
+
+/* ------------------------------------------------------------------ */
+/*  Stats Grid                                                         */
+/* ------------------------------------------------------------------ */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-md);
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+
+.statCard:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-bg-elevated);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.statIconHealthy {
+  background: var(--color-success) !important;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.3);
+}
+
+.statIconDegraded {
+  background: var(--color-warning) !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+}
+
+.statIconDown {
+  background: var(--color-danger) !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+}
+
+.statIconStarting {
+  background: var(--color-warning) !important;
+  box-shadow: 0 0 16px rgba(163, 230, 53, 0.28);
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.statDetail {
+  margin-top: 0.28rem;
+  color: var(--color-text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statArrow {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+}
+
+.statCard:hover .statArrow {
+  color: var(--color-primary);
+  transform: translateX(2px);
+}

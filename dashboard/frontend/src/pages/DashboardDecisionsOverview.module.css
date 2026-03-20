@@ -1,0 +1,114 @@
+
+.decisionTable {
+  font-size: var(--text-xs);
+}
+
+.decisionTableHead {
+  display: grid;
+  grid-template-columns: 2.2fr 0.7fr 0.6fr 2fr;
+  gap: var(--spacing-sm);
+  padding: 8px var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.decisionTableRow {
+  display: grid;
+  grid-template-columns: 2.2fr 0.7fr 0.6fr 2fr;
+  gap: var(--spacing-sm);
+  padding: 10px var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.decisionTableRow:hover {
+  background: var(--color-bg-elevated);
+}
+
+.decisionName {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decisionPriority {
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.decisionBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.badgeGuardrail {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.badgeRouting {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.badgeFallback {
+  background: rgba(156, 163, 175, 0.12);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.25);
+}
+
+.decisionModels {
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decisionTableMore {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  border: none;
+  border-top: 1px solid var(--color-border);
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition-fast);
+}
+
+.decisionTableMore:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-primary);
+}
+
+@media (max-width: 640px) {
+  .decisionTableHead,
+  .decisionTableRow {
+    grid-template-columns: 1.5fr 0.5fr 1fr;
+  }
+
+  .decisionModels {
+    display: none;
+  }
+}
