@@ -1,121 +1,12 @@
 import React, { memo, useCallback, useState } from 'react'
-import { Handle, Position, type NodeProps, type NodeTypes } from 'reactflow'
+import { Handle, Position, type NodeProps } from 'reactflow'
 
 import styles from './ExpressionBuilder.module.css'
+import { OPERATOR_META } from './ExpressionBuilderNodeSupport'
 import { DRAG_MIME, decodeDrag, type RuleNode } from './ExpressionBuilderSupport'
 import type { FlowNodeData } from './ExpressionBuilderFlow'
 
-interface GateShapeProps {
-  color: string
-  opacity?: number
-}
-
-export type OperatorKind = 'AND' | 'OR' | 'NOT'
-
-export const GateAND: React.FC<GateShapeProps> = ({ color, opacity = 1 }) => (
-  <svg viewBox="0 0 84 64" width="84" height="64" className={styles.gateSvg} style={{ opacity }}>
-    <path
-      d="M 6 4 L 78 4 L 78 30 Q 78 60 42 60 Q 6 60 6 30 Z"
-      fill={color.replace(/[\d.]+\)$/, '0.08)')}
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinejoin="round"
-    />
-  </svg>
-)
-
-export const GateOR: React.FC<GateShapeProps> = ({ color, opacity = 1 }) => (
-  <svg viewBox="0 0 84 64" width="84" height="64" className={styles.gateSvg} style={{ opacity }}>
-    <path
-      d="M 6 4 Q 42 18 78 4 Q 74 44 42 62 Q 10 44 6 4 Z"
-      fill={color.replace(/[\d.]+\)$/, '0.08)')}
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinejoin="round"
-    />
-  </svg>
-)
-
-export const GateNOT: React.FC<GateShapeProps> = ({ color, opacity = 1 }) => (
-  <svg viewBox="0 0 84 70" width="84" height="70" className={styles.gateSvg} style={{ opacity }}>
-    <path
-      d="M 10 4 L 74 4 L 42 52 Z"
-      fill={color.replace(/[\d.]+\)$/, '0.08)')}
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinejoin="round"
-    />
-    <circle
-      cx="42"
-      cy="60"
-      r="6"
-      fill={color.replace(/[\d.]+\)$/, '0.08)')}
-      stroke={color}
-      strokeWidth="2.5"
-    />
-  </svg>
-)
-
-export const OPERATOR_ORDER: OperatorKind[] = ['AND', 'OR', 'NOT']
-
-export const OPERATOR_META: Record<
-  OperatorKind,
-  {
-    color: string
-    description: string
-    icon: string
-    GateShape: React.FC<GateShapeProps>
-  }
-> = {
-  AND: {
-    color: '#818cf8',
-    description: 'A AND B',
-    icon: '∧',
-    GateShape: GateAND,
-  },
-  OR: {
-    color: '#34d399',
-    description: 'A OR B',
-    icon: '∨',
-    GateShape: GateOR,
-  },
-  NOT: {
-    color: '#f87171',
-    description: 'NOT A',
-    icon: '¬',
-    GateShape: GateNOT,
-  },
-}
-
-export interface BuilderTemplate {
-  name: string
-  op: OperatorKind
-  desc: string
-  build: () => RuleNode
-}
-
-export const BUILDER_TEMPLATES: BuilderTemplate[] = [
-  {
-    name: 'AND Gate',
-    op: 'AND',
-    desc: OPERATOR_META.AND.description,
-    build: () => ({ operator: 'AND', conditions: [] }),
-  },
-  {
-    name: 'OR Gate',
-    op: 'OR',
-    desc: OPERATOR_META.OR.description,
-    build: () => ({ operator: 'OR', conditions: [] }),
-  },
-  {
-    name: 'NOT Gate',
-    op: 'NOT',
-    desc: OPERATOR_META.NOT.description,
-    build: () => ({ operator: 'NOT', conditions: [] as unknown as [RuleNode] }),
-  },
-]
-
-const OperatorNodeComponent = memo<NodeProps<FlowNodeData>>(({ data, selected }) => {
+export const OperatorNodeComponent = memo<NodeProps<FlowNodeData>>(({ data, selected }) => {
   const [dragOver, setDragOver] = useState(false)
 
   const handleDragOver = useCallback((event: React.DragEvent) => {
@@ -201,7 +92,7 @@ const OperatorNodeComponent = memo<NodeProps<FlowNodeData>>(({ data, selected })
 })
 OperatorNodeComponent.displayName = 'OperatorNode'
 
-const SignalNodeComponent = memo<NodeProps<FlowNodeData>>(({ data, selected }) => {
+export const SignalNodeComponent = memo<NodeProps<FlowNodeData>>(({ data, selected }) => {
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation()
@@ -225,8 +116,3 @@ const SignalNodeComponent = memo<NodeProps<FlowNodeData>>(({ data, selected }) =
   )
 })
 SignalNodeComponent.displayName = 'SignalNode'
-
-export const nodeTypes: NodeTypes = {
-  operatorNode: OperatorNodeComponent,
-  signalNode: SignalNodeComponent,
-}

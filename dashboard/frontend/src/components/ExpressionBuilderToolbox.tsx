@@ -1,6 +1,6 @@
 import styles from './ExpressionBuilder.module.css'
+import { OPERATOR_META, OPERATOR_ORDER } from './ExpressionBuilderNodeSupport'
 import { DRAG_MIME, encodeDrag, type SignalDescriptor } from './ExpressionBuilderSupport'
-import { OPERATOR_META, OPERATOR_ORDER } from './ExpressionBuilderNodes'
 
 interface ExpressionBuilderToolboxProps {
   collapsedGroups: Set<string>

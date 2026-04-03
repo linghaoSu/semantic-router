@@ -6,7 +6,7 @@ import {
   type NodePath,
   type RuleNode,
 } from './ExpressionBuilderSupport'
-import type { OperatorKind } from './ExpressionBuilderNodes'
+import type { OperatorKind } from './ExpressionBuilderNodeSupport'
 
 interface ExpressionBuilderContextMenuProps {
   contextMenu: { x: number; y: number; path: NodePath }

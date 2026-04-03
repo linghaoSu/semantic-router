@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
 import styles from './ExpressionBuilder.module.css'
+import { OPERATOR_ORDER } from './ExpressionBuilderNodeSupport'
 import type { RuleNode, SignalDescriptor } from './ExpressionBuilderSupport'
-import { OPERATOR_ORDER } from './ExpressionBuilderNodes'
 
 interface EditSignalDialogProps {
   signalType: string

@@ -1,5 +1,9 @@
 import styles from './ExpressionBuilder.module.css'
-import { BUILDER_TEMPLATES, OPERATOR_META, type BuilderTemplate } from './ExpressionBuilderNodes'
+import {
+  BUILDER_TEMPLATES,
+  OPERATOR_META,
+  type BuilderTemplate,
+} from './ExpressionBuilderNodeSupport'
 
 interface ExpressionBuilderCanvasEmptyStateProps {
   onApplyTemplate: (template: BuilderTemplate) => void
