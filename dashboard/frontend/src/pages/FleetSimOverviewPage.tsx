@@ -14,9 +14,8 @@ import {
   formatNumber,
   formatRouterType,
   formatTraceFormat,
-  JobStatusBadge,
-  renderJobResultSummary,
 } from './fleetSimPageSupport'
+import { JobResultSummary, JobStatusBadge } from './fleetSimPageJobResults'
 
 type PlanningAssetItem =
   | {
@@ -196,7 +195,7 @@ export default function FleetSimOverviewPage() {
                 <JobStatusBadge status={latestJob.status} />
               </div>
               <div className={styles.resultCard} style={{ marginTop: '0.9rem' }}>
-                {renderJobResultSummary(latestJob)}
+                <JobResultSummary job={latestJob} />
               </div>
               <p className={styles.inlineHint}>
                 {finishedJobs.length} completed runs are available for comparison in the Runs page.
