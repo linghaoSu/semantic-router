@@ -17,16 +17,19 @@ import type {
 
 import styles from "./BuilderPage.module.css";
 import { CustomSelect } from "./builderPageFormPrimitives";
-import { AlgorithmSchemaEditor, PluginSchemaEditor } from "./builderPageEntityForms";
+import { AlgorithmSchemaEditor } from "./builderPageEntityForms";
+import BuilderPageRouteModelsCard from "./builderPageRouteModelsCard";
+import BuilderPageRoutePluginsCard from "./builderPageRoutePluginsCard";
 import {
-  RouteDslPreviewPanel,
   astAlgoToInput,
   astModelToInput,
   astPluginRefToInput,
   generateRouteDslPreview,
   validateRouteInput,
+} from "./builderPageRouteSupport";
+import {
+  RouteDslPreviewPanel,
 } from "./builderPageRoutePreview";
-import { ModelNameInput, ManualPluginAdder } from "./builderPageRouteSharedControls";
 import type { AvailablePlugin, AvailableSignal } from "./builderPageTypes";
 
 const RouteEditorForm: React.FC<{
@@ -242,132 +245,17 @@ const RouteEditorForm: React.FC<{
         </div>
       </div>
 
-      {/* Models */}
-      <div className={styles.dslPreview}>
-        <div className={styles.dslPreviewHeader}>
-          <span className={styles.dslPreviewTitle}>
-            Models ({models.length})
-          </span>
-          <button
-            className={styles.toolbarBtn}
-            onClick={addModel}
-            style={{ padding: "0.25rem 0.5rem", fontSize: "var(--text-xs)" }}
-          >
-            + Add Model
-          </button>
-        </div>
-        <div
-          style={{
-            padding: "var(--spacing-md)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--spacing-sm)",
-          }}
-        >
-          {models.length === 0 && (
-            <span
-              style={{
-                fontSize: "var(--text-xs)",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              No models configured. Add at least one model.
-            </span>
-          )}
-          {models.map((m, idx) => (
-            <div key={idx} className={styles.modelCard}>
-              <div className={styles.modelCardHeader}>
-                <span className={styles.modelIndex}>{idx + 1}</span>
-                <ModelNameInput
-                  value={m.model}
-                  availableModels={availableModels}
-                  onChange={(v) => updateModel(idx, { model: v })}
-                />
-                <button
-                  className={styles.toolbarBtnDanger}
-                  onClick={() => removeModel(idx)}
-                  style={{
-                    padding: "0.25rem 0.5rem",
-                    fontSize: "var(--text-xs)",
-                    flexShrink: 0,
-                  }}
-                  title="Remove model"
-                >
-                  ×
-                </button>
-              </div>
-              <div className={styles.modelAttrs}>
-                <label className={styles.modelAttrCheck}>
-                  <input
-                    type="checkbox"
-                    checked={m.reasoning ?? false}
-                    onChange={(e) =>
-                      updateModel(idx, {
-                        reasoning: e.target.checked || undefined,
-                      })
-                    }
-                    style={{ accentColor: "var(--color-primary)" }}
-                  />
-                  reasoning
-                </label>
-                <div className={styles.modelAttrField}>
-                  <span className={styles.modelAttrLabel}>effort:</span>
-                  <div style={{ minWidth: "90px" }}>
-                    <CustomSelect
-                      value={m.effort ?? ""}
-                      options={["", "low", "medium", "high"]}
-                      onChange={(v) =>
-                        updateModel(idx, { effort: v || undefined })
-                      }
-                      placeholder="—"
-                    />
-                  </div>
-                </div>
-                <div className={styles.modelAttrField}>
-                  <span className={styles.modelAttrLabel}>weight:</span>
-                  <input
-                    className={styles.fieldInput}
-                    style={{
-                      width: "60px",
-                      fontSize: "var(--text-xs)",
-                      padding: "0.25rem 0.5rem",
-                    }}
-                    type="number"
-                    step="any"
-                    value={m.weight !== undefined ? m.weight : ""}
-                    onChange={(e) =>
-                      updateModel(idx, {
-                        weight: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
-                      })
-                    }
-                    placeholder="—"
-                  />
-                </div>
-                <div className={styles.modelAttrField}>
-                  <span className={styles.modelAttrLabel}>param_size:</span>
-                  <input
-                    className={styles.fieldInput}
-                    style={{
-                      width: "70px",
-                      fontSize: "var(--text-xs)",
-                      padding: "0.25rem 0.5rem",
-                    }}
-                    value={m.paramSize ?? ""}
-                    onChange={(e) =>
-                      updateModel(idx, {
-                        paramSize: e.target.value || undefined,
-                      })
-                    }
-                    placeholder="—"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <BuilderPageRouteModelsCard
+        addLabel="+ Add Model"
+        allowRemoveSingle
+        availableModels={availableModels}
+        emptyMessage="No models configured. Add at least one model."
+        models={models}
+        showWeightAndParamSize
+        onAddModel={addModel}
+        onRemoveModel={removeModel}
+        onUpdateModel={updateModel}
+      />
 
       {/* Algorithm */}
       <div className={styles.dslPreview}>
@@ -447,99 +335,18 @@ const RouteEditorForm: React.FC<{
         )}
       </div>
 
-      {/* Plugins Toggle Panel */}
-      <div className={styles.dslPreview}>
-        <div className={styles.dslPreviewHeader}>
-          <span className={styles.dslPreviewTitle}>
-            Plugins ({plugins.length})
-          </span>
-        </div>
-        <div
-          style={{
-            padding: "var(--spacing-md)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--spacing-sm)",
-          }}
-        >
-          {/* Toggle chips for available plugins */}
-          {availablePlugins.length > 0 && (
-            <div className={styles.pluginToggleGrid}>
-              {availablePlugins.map((p) => {
-                const active = activePluginNames.has(p.name);
-                return (
-                  <button
-                    key={p.name}
-                    className={
-                      active ? styles.pluginToggleActive : styles.pluginToggle
-                    }
-                    onClick={() => togglePlugin(p.name)}
-                    title={`${active ? "Remove" : "Add"} plugin ${p.name}`}
-                  >
-                    <span className={styles.pluginToggleCheck}>
-                      {active ? "✓" : "○"}
-                    </span>
-                    <span className={styles.pluginToggleName}>{p.name}</span>
-                    <span className={styles.pluginToggleType}>
-                      {p.pluginType}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          {availablePlugins.length === 0 && (
-            <span
-              style={{
-                fontSize: "var(--text-xs)",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              No plugins defined. Create plugins first.
-            </span>
-          )}
-
-          {/* Active plugin configuration editors */}
-          {plugins.length > 0 && (
-            <div
-              style={{
-                marginTop: "var(--spacing-sm)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--spacing-sm)",
-              }}
-            >
-              <span className={styles.fieldLabel} style={{ display: "block" }}>
-                Plugin Configuration
-              </span>
-              {plugins.map((p) => {
-                // Resolve pluginType: from top-level template, or treat name as type for inline plugins
-                const tmpl = availablePlugins.find((ap) => ap.name === p.name);
-                const pluginType = tmpl?.pluginType ?? p.name;
-                return (
-                  <div key={p.name} className={styles.pluginOverride}>
-                    <PluginSchemaEditor
-                      pluginType={pluginType}
-                      pluginName={p.name}
-                      fields={p.fields ?? {}}
-                      onUpdate={(f) => updatePluginFields(p.name, f)}
-                      compact
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Manual plugin add (for inline plugins not in templates) */}
-          <ManualPluginAdder
-            existingNames={activePluginNames}
-            onAdd={(name, fields) =>
-              setPlugins((prev) => [...prev, { name, fields }])
-            }
-          />
-        </div>
-      </div>
+      <BuilderPageRoutePluginsCard
+        activePluginNames={activePluginNames}
+        availablePlugins={availablePlugins}
+        emptyMessage="No plugins defined. Create plugins first."
+        plugins={plugins}
+        showPluginType
+        onAddManualPlugin={(name) =>
+          setPlugins((prev) => [...prev, { name }])
+        }
+        onTogglePlugin={togglePlugin}
+        onUpdatePluginFields={updatePluginFields}
+      />
 
       {/* DSL Preview with validation */}
       <RouteDslPreviewPanel

@@ -15,13 +15,16 @@ import type {
 
 import styles from "./BuilderPage.module.css";
 import { CustomSelect, RouteIcon } from "./builderPageFormPrimitives";
-import { AlgorithmSchemaEditor, PluginSchemaEditor } from "./builderPageEntityForms";
+import { AlgorithmSchemaEditor } from "./builderPageEntityForms";
+import BuilderPageRouteModelsCard from "./builderPageRouteModelsCard";
+import BuilderPageRoutePluginsCard from "./builderPageRoutePluginsCard";
 import {
-  RouteDslPreviewPanel,
   generateRouteDslPreview,
   validateRouteInput,
+} from "./builderPageRouteSupport";
+import {
+  RouteDslPreviewPanel,
 } from "./builderPageRoutePreview";
-import { ModelNameInput, ManualPluginAdder } from "./builderPageRouteSharedControls";
 import type { AvailablePlugin, AvailableSignal } from "./builderPageTypes";
 
 // ===================================================================
@@ -239,83 +242,16 @@ const AddRouteForm: React.FC<{
         </div>
       </div>
 
-      {/* Models */}
-      <div className={styles.dslPreview}>
-        <div className={styles.dslPreviewHeader}>
-          <span className={styles.dslPreviewTitle}>
-            Models ({models.length})
-          </span>
-          <button
-            className={styles.toolbarBtn}
-            onClick={addModel}
-            style={{ padding: "0.25rem 0.5rem", fontSize: "var(--text-xs)" }}
-          >
-            + Add
-          </button>
-        </div>
-        <div
-          style={{
-            padding: "var(--spacing-md)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--spacing-sm)",
-          }}
-        >
-          {models.map((m, idx) => (
-            <div key={idx} className={styles.modelCard}>
-              <div className={styles.modelCardHeader}>
-                <span className={styles.modelIndex}>{idx + 1}</span>
-                <ModelNameInput
-                  value={m.model}
-                  availableModels={availableModels}
-                  onChange={(v) => updateModel(idx, { model: v })}
-                />
-                {models.length > 1 && (
-                  <button
-                    className={styles.toolbarBtnDanger}
-                    onClick={() => removeModel(idx)}
-                    style={{
-                      padding: "0.25rem 0.5rem",
-                      fontSize: "var(--text-xs)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-              <div className={styles.modelAttrs}>
-                <label className={styles.modelAttrCheck}>
-                  <input
-                    type="checkbox"
-                    checked={m.reasoning ?? false}
-                    onChange={(e) =>
-                      updateModel(idx, {
-                        reasoning: e.target.checked || undefined,
-                      })
-                    }
-                    style={{ accentColor: "var(--color-primary)" }}
-                  />
-                  reasoning
-                </label>
-                <div className={styles.modelAttrField}>
-                  <span className={styles.modelAttrLabel}>effort:</span>
-                  <div style={{ minWidth: "90px" }}>
-                    <CustomSelect
-                      value={m.effort ?? ""}
-                      options={["", "low", "medium", "high"]}
-                      onChange={(v) =>
-                        updateModel(idx, { effort: v || undefined })
-                      }
-                      placeholder="—"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <BuilderPageRouteModelsCard
+        addLabel="+ Add"
+        allowRemoveSingle={false}
+        availableModels={availableModels}
+        models={models}
+        showWeightAndParamSize={false}
+        onAddModel={addModel}
+        onRemoveModel={removeModel}
+        onUpdateModel={updateModel}
+      />
 
       {/* Algorithm */}
       <div className={styles.dslPreview}>
@@ -379,90 +315,16 @@ const AddRouteForm: React.FC<{
         )}
       </div>
 
-      {/* Plugins Toggle Panel */}
-      <div className={styles.dslPreview}>
-        <div className={styles.dslPreviewHeader}>
-          <span className={styles.dslPreviewTitle}>
-            Plugins ({plugins.length})
-          </span>
-        </div>
-        <div
-          style={{
-            padding: "var(--spacing-md)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--spacing-sm)",
-          }}
-        >
-          {availablePlugins.length > 0 ? (
-            <div className={styles.pluginToggleGrid}>
-              {availablePlugins.map((p) => {
-                const active = activePluginNames.has(p.name);
-                return (
-                  <button
-                    key={p.name}
-                    className={
-                      active ? styles.pluginToggleActive : styles.pluginToggle
-                    }
-                    onClick={() => togglePlugin(p.name)}
-                  >
-                    <span className={styles.pluginToggleCheck}>
-                      {active ? "✓" : "○"}
-                    </span>
-                    <span className={styles.pluginToggleName}>{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <span
-              style={{
-                fontSize: "var(--text-xs)",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              No plugins defined yet.
-            </span>
-          )}
-
-          {/* Active plugin configuration editors */}
-          {plugins.length > 0 && (
-            <div
-              style={{
-                marginTop: "var(--spacing-sm)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--spacing-sm)",
-              }}
-            >
-              <span className={styles.fieldLabel} style={{ display: "block" }}>
-                Plugin Configuration
-              </span>
-              {plugins.map((p) => {
-                const tmpl = availablePlugins.find((ap) => ap.name === p.name);
-                const pType = tmpl?.pluginType ?? p.name;
-                return (
-                  <div key={p.name} className={styles.pluginOverride}>
-                    <PluginSchemaEditor
-                      pluginType={pType}
-                      pluginName={p.name}
-                      fields={p.fields ?? {}}
-                      onUpdate={(f) => updatePluginFields(p.name, f)}
-                      compact
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Manual plugin add (for inline plugins not in templates) */}
-          <ManualPluginAdder
-            existingNames={activePluginNames}
-            onAdd={(name) => setPlugins((prev) => [...prev, { name }])}
-          />
-        </div>
-      </div>
+      <BuilderPageRoutePluginsCard
+        activePluginNames={activePluginNames}
+        availablePlugins={availablePlugins}
+        emptyMessage="No plugins defined yet."
+        plugins={plugins}
+        showPluginType={false}
+        onAddManualPlugin={(name) => setPlugins((prev) => [...prev, { name }])}
+        onTogglePlugin={togglePlugin}
+        onUpdatePluginFields={updatePluginFields}
+      />
 
       {/* DSL Preview with validation */}
       <RouteDslPreviewPanel dslText={dslPreview} issues={validationIssues} />

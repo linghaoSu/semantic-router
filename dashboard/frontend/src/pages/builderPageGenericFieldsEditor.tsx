@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import type { DSLFieldObject, DSLFieldValue } from "@/types/dsl";
 
 import styles from "./BuilderPage.module.css";
-import { tryParseValue } from "./builderPageFieldControls";
+import { tryParseValue } from "./builderPageFieldParsing";
 
 export const GenericFieldsEditor: React.FC<{
   fields: DSLFieldObject;

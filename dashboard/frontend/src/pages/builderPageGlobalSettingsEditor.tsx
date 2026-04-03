@@ -16,8 +16,8 @@ import {
 import { GlobalSettingsRoutingSection } from "./builderPageGlobalSettingsRoutingSection";
 import {
   DslPreviewPanel,
-  generateGlobalOverridePreview,
 } from "./builderPageSharedDslEditors";
+import { generateGlobalOverridePreview } from "./builderPageDslPreview";
 
 const GlobalSettingsEditor: React.FC<{
   fields: DSLFieldObject;

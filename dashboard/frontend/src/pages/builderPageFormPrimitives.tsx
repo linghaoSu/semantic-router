@@ -1,10 +1,8 @@
+export { NumberArrayEditor, StringArrayEditor } from "./builderPageArrayEditors";
+export { CustomSelect } from "./builderPageCustomSelect";
 export { GenericFieldsEditor } from "./builderPageGenericFieldsEditor";
 export {
-  CustomSelect,
   FieldEditor,
-  NumberArrayEditor,
-  StringArrayEditor,
-  tryParseValue,
 } from "./builderPageFieldControls";
 export {
   BackendIcon,
