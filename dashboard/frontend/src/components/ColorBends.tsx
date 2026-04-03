@@ -156,10 +156,41 @@ export default function ColorBends({
   const pointerCurrentRef = useRef(new THREE.Vector2(0, 0))
   const rotationRef = useRef(rotation)
   const autoRotateRef = useRef(autoRotate)
+  const uniformConfigRef = useRef({
+    frequency,
+    mouseInfluence,
+    noise,
+    parallax,
+    scale,
+    speed,
+    transparent,
+    warpStrength,
+  })
+
+  uniformConfigRef.current = {
+    frequency,
+    mouseInfluence,
+    noise,
+    parallax,
+    scale,
+    speed,
+    transparent,
+    warpStrength,
+  }
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+    const {
+      frequency: initialFrequency,
+      mouseInfluence: initialMouseInfluence,
+      noise: initialNoise,
+      parallax: initialParallax,
+      scale: initialScale,
+      speed: initialSpeed,
+      transparent: initialTransparent,
+      warpStrength: initialWarpStrength,
+    } = uniformConfigRef.current
 
     const scene = new THREE.Scene()
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
@@ -173,18 +204,18 @@ export default function ColorBends({
       uniforms: {
         uCanvas: { value: new THREE.Vector2(1, 1) },
         uTime: { value: 0 },
-        uSpeed: { value: speed },
+        uSpeed: { value: initialSpeed },
         uRot: { value: new THREE.Vector2(1, 0) },
         uColorCount: { value: 0 },
         uColors: { value: uColorsArray },
-        uTransparent: { value: transparent ? 1 : 0 },
-        uScale: { value: scale },
-        uFrequency: { value: frequency },
-        uWarpStrength: { value: warpStrength },
+        uTransparent: { value: initialTransparent ? 1 : 0 },
+        uScale: { value: initialScale },
+        uFrequency: { value: initialFrequency },
+        uWarpStrength: { value: initialWarpStrength },
         uPointer: { value: new THREE.Vector2(0, 0) },
-        uMouseInfluence: { value: mouseInfluence },
-        uParallax: { value: parallax },
-        uNoise: { value: noise },
+        uMouseInfluence: { value: initialMouseInfluence },
+        uParallax: { value: initialParallax },
+        uNoise: { value: initialNoise },
       },
       premultipliedAlpha: true,
       transparent: true,
@@ -204,7 +235,7 @@ export default function ColorBends({
     rendererRef.current = renderer
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.setClearColor(0x000000, transparent ? 0 : 1)
+    renderer.setClearColor(0x000000, initialTransparent ? 0 : 1)
     renderer.domElement.style.width = '100%'
     renderer.domElement.style.height = '100%'
     renderer.domElement.style.display = 'block'
