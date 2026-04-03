@@ -16,16 +16,19 @@ import {
   DEFAULT_REMOTE_SETUP_CONFIG_URL,
   getStepOneErrors,
   maskSecrets,
-  PROVIDER_OPTIONS,
   type ImportedSetupConfig,
   type ModelDraft,
-  type ProviderKind,
   type RemoteImportState,
   type SetupActivationState,
   type SetupRoutingMode,
   type SetupStep,
   type SetupValidationState,
 } from "./setupWizardSupport";
+import {
+  addSetupModel,
+  removeSetupModel,
+  updateSetupModel,
+} from "./setupWizardModelState";
 
 export function useSetupWizardState() {
   const navigate = useNavigate();
@@ -86,6 +89,29 @@ export function useSetupWizardState() {
     setValidatedCounts(createSetupConfigCounts());
     setActivationState("idle");
     setActivationError(null);
+  };
+
+  const selectRoutingMode = (mode: SetupRoutingMode) => {
+    setRoutingMode(mode);
+    setRemoteImportError(null);
+    resetReviewState();
+  };
+
+  const changeRemoteConfigUrl = (value: string) => {
+    setRemoteConfigUrl(value);
+    setRemoteImportError(null);
+    if (
+      importedRemoteConfig &&
+      value.trim() !== importedRemoteConfig.sourceUrl
+    ) {
+      setImportedRemoteConfig(null);
+      setRemoteImportState("idle");
+      resetReviewState();
+      return;
+    }
+    if (remoteImportState === "error") {
+      setRemoteImportState("idle");
+    }
   };
 
   let scratchConfig: Record<string, unknown> | null = null;
@@ -179,40 +205,17 @@ export function useSetupWizardState() {
   }, [currentStep, validationSignature]);
 
   const addModel = () => {
-    setModels((prev) => [...prev, createModelDraft(prev.length + 1)]);
+    setModels(addSetupModel);
     resetReviewState();
   };
 
   const updateModel = (id: string, field: keyof ModelDraft, value: string) => {
-    setModels((prev) =>
-      prev.map((model) => {
-        if (model.id !== id) {
-          return model;
-        }
-
-        if (field === "providerKind") {
-          const nextProvider = value as ProviderKind;
-          const nextPlaceholder = PROVIDER_OPTIONS.find(
-            (option) => option.id === nextProvider,
-          )?.placeholder;
-          return {
-            ...model,
-            providerKind: nextProvider,
-            baseUrl: model.baseUrl.trim()
-              ? model.baseUrl
-              : nextPlaceholder || model.baseUrl,
-          };
-        }
-
-        return { ...model, [field]: value };
-      }),
-    );
-
+    setModels((prev) => updateSetupModel(prev, id, field, value));
     resetReviewState();
   };
 
   const removeModel = (id: string) => {
-    setModels((prev) => prev.filter((model) => model.id !== id));
+    setModels((prev) => removeSetupModel(prev, id));
     resetReviewState();
   };
 
@@ -370,16 +373,12 @@ export function useSetupWizardState() {
 
     // Routing state
     routingMode,
-    setRoutingMode,
     remoteConfigUrl,
-    setRemoteConfigUrl,
     remoteImportState,
-    setRemoteImportState,
     remoteImportError,
-    setRemoteImportError,
     importedRemoteConfig,
-    setImportedRemoteConfig,
-    resetReviewState,
+    selectRoutingMode,
+    changeRemoteConfigUrl,
     handleImportRemote,
 
     // Derived draft state

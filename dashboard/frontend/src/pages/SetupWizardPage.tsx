@@ -75,27 +75,8 @@ const SetupWizardPage: React.FC = () => {
               remoteImportError={state.remoteImportError}
               importedConfig={state.importedRemoteConfig}
               counts={state.generatedCounts}
-              onSelectRoutingMode={(mode) => {
-                state.setRoutingMode(mode);
-                state.setRemoteImportError(null);
-                state.resetReviewState();
-              }}
-              onChangeRemoteConfigUrl={(value) => {
-                state.setRemoteConfigUrl(value);
-                state.setRemoteImportError(null);
-                if (
-                  state.importedRemoteConfig &&
-                  value.trim() !== state.importedRemoteConfig.sourceUrl
-                ) {
-                  state.setImportedRemoteConfig(null);
-                  state.setRemoteImportState("idle");
-                  state.resetReviewState();
-                  return;
-                }
-                if (state.remoteImportState === "error") {
-                  state.setRemoteImportState("idle");
-                }
-              }}
+              onSelectRoutingMode={state.selectRoutingMode}
+              onChangeRemoteConfigUrl={state.changeRemoteConfigUrl}
               onImportRemoteConfig={() => void state.handleImportRemote()}
             />
           )}
