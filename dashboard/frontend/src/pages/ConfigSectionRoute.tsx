@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import Layout from '../components/Layout'
-import { ConfigSection } from '../components/ConfigNav'
+import type { ConfigSection } from '../components/ConfigNav'
+import { useConfigSection } from '../contexts/useConfigSection'
 import ConfigPage from './ConfigPage'
 
-const ConfigSectionRoute: React.FC<{
-  configSection: ConfigSection
-  setConfigSection: (section: ConfigSection) => void
-}> = ({ configSection, setConfigSection }) => {
+const ConfigSectionRoute: React.FC = () => {
   const { section } = useParams<{ section: string }>()
+  const { configSection, setConfigSection } = useConfigSection()
 
   useEffect(() => {
     if (!section) {
@@ -38,10 +37,7 @@ const ConfigSectionRoute: React.FC<{
   }, [section, configSection, setConfigSection])
 
   return (
-    <Layout
-      configSection={configSection}
-      onConfigSectionChange={(nextSection) => setConfigSection(nextSection as ConfigSection)}
-    >
+    <Layout>
       <ConfigPage activeSection={configSection} />
     </Layout>
   )

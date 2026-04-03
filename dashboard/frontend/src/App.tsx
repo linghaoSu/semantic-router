@@ -1,56 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import Layout from './components/Layout'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthGate, AuthenticatedShell } from './components/AppRouteGates'
 import SetupStatusPage from './components/SetupStatusPage'
 import LandingPage from './pages/LandingPage'
-import MonitoringPage from './pages/MonitoringPage'
-import PlaygroundPage from './pages/PlaygroundPage'
-import PlaygroundFullscreenPage from './pages/PlaygroundFullscreenPage'
-import TopologyPage from './pages/TopologyPage'
-import TracingPage from './pages/TracingPage'
-import StatusPage from './pages/StatusPage'
-import LogsPage from './pages/LogsPage'
-import EvaluationPage from './pages/EvaluationPage'
-import MLSetupPage from './pages/MLSetupPage'
-import RatingsPage from './pages/RatingsPage'
-import BuilderPage from './pages/BuilderPage'
-import DashboardPage from './pages/DashboardPage'
-import FleetSimOverviewPage from './pages/FleetSimOverviewPage'
-import FleetSimWorkloadsPage from './pages/FleetSimWorkloadsPage'
-import FleetSimFleetsPage from './pages/FleetSimFleetsPage'
-import FleetSimRunsPage from './pages/FleetSimRunsPage'
-import OpenClawPage from './pages/OpenClawPage'
-import UsersPage from './pages/UsersPage'
-import InsightsPage from './pages/InsightsPage'
-import { ConfigSection } from './components/ConfigNav'
+import { ConfigSectionProvider } from './contexts/ConfigSectionContext'
 import { ReadonlyProvider } from './contexts/ReadonlyContext'
 import { SetupProvider, useSetup } from './contexts/SetupContext'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
-import SetupWizardPage from './pages/SetupWizardPage'
-import ConfigSectionRoute from './pages/ConfigSectionRoute'
+import { useAuth } from './contexts/AuthContext'
+import { AuthProvider } from './contexts/AuthProvider'
 import LoginPage from './pages/LoginPage'
 import AuthTransitionPage from './pages/AuthTransitionPage'
 import { canAccessMLSetup } from './utils/accessControl'
+import { renderAuthenticatedRoutes } from './appRouteSupport'
 
 const AppRouter: React.FC = () => {
   const { setupState, isLoading, error, refreshSetupState } = useSetup()
   const { user } = useAuth()
-  const [configSection, setConfigSection] = useState<ConfigSection>('global-config')
   const canUseMLSetup = canAccessMLSetup(user)
-
-  const withLayout = (
-    page: React.ReactNode,
-    layoutProps?: { hideHeaderOnMobile?: boolean; hideAccountControl?: boolean }
-  ) => (
-    <Layout
-      configSection={configSection}
-      onConfigSectionChange={(section) => setConfigSection(section as ConfigSection)}
-      {...layoutProps}
-    >
-      {page}
-    </Layout>
-  )
 
   if (isLoading) {
     return (
@@ -89,54 +55,10 @@ const AppRouter: React.FC = () => {
 
         <Route element={<AuthGate />}>
           <Route element={<AuthenticatedShell />}>
-            <Route path="/setup" element={<SetupWizardPage />} />
-            <Route path="/dashboard" element={withLayout(<DashboardPage />)} />
-            <Route path="/monitoring" element={withLayout(<MonitoringPage />)} />
-            <Route
-              path="/config"
-              element={
-                <ConfigSectionRoute
-                  configSection={configSection}
-                  setConfigSection={setConfigSection}
-                />
-              }
-            />
-            <Route
-              path="/config/:section"
-              element={
-                <ConfigSectionRoute
-                  configSection={configSection}
-                  setConfigSection={setConfigSection}
-                />
-              }
-            />
-            <Route
-              path="/playground"
-              element={withLayout(<PlaygroundPage />, { hideHeaderOnMobile: true, hideAccountControl: true })}
-            />
-            <Route path="/playground/fullscreen" element={<PlaygroundFullscreenPage />} />
-            <Route path="/topology" element={withLayout(<TopologyPage />)} />
-            <Route path="/tracing" element={withLayout(<TracingPage />)} />
-            <Route path="/status" element={withLayout(<StatusPage />)} />
-            <Route path="/logs" element={withLayout(<LogsPage />)} />
-            <Route path="/insights" element={withLayout(<InsightsPage />)} />
-            <Route path="/evaluation" element={withLayout(<EvaluationPage />)} />
-            <Route
-              path="/ml-setup"
-              element={
-                canUseMLSetup ? withLayout(<MLSetupPage />) : <Navigate to="/dashboard" replace />
-              }
-            />
-            <Route path="/ratings" element={withLayout(<RatingsPage />)} />
-            <Route path="/fleet-sim" element={withLayout(<FleetSimOverviewPage />)} />
-            <Route path="/fleet-sim/workloads" element={withLayout(<FleetSimWorkloadsPage />)} />
-            <Route path="/fleet-sim/fleets" element={withLayout(<FleetSimFleetsPage />)} />
-            <Route path="/fleet-sim/runs" element={withLayout(<FleetSimRunsPage />)} />
-            <Route path="/builder" element={withLayout(<BuilderPage />)} />
-            <Route path="/clawos" element={withLayout(<OpenClawPage />)} />
-            <Route path="/users" element={withLayout(<UsersPage />)} />
-            <Route path="/openclaw" element={<Navigate to="/clawos" replace />} />
-            <Route path="*" element={<Navigate to={setupMode ? '/setup' : '/dashboard'} replace />} />
+            {renderAuthenticatedRoutes({
+              canUseMLSetup,
+              setupMode,
+            })}
           </Route>
         </Route>
       </Routes>
@@ -207,9 +129,11 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <ReadonlyProvider>
-        <SetupProvider>
-          <AppRouter />
-        </SetupProvider>
+        <ConfigSectionProvider>
+          <SetupProvider>
+            <AppRouter />
+          </SetupProvider>
+        </ConfigSectionProvider>
       </ReadonlyProvider>
     </AuthProvider>
   )
