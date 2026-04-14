@@ -7,9 +7,7 @@ import React, {
 } from "react";
 
 import { useDSLStore } from "@/stores/dslStore";
-import type { DSLFieldObject } from "@/types/dsl";
 import type { EditorMode } from "@/types/dsl";
-import type { RouteInput } from "@/lib/dslMutations";
 
 import styles from "./BuilderPage.module.css";
 import DslEditorPage from "./DslEditorPage";
@@ -24,6 +22,7 @@ import { BuilderStatusBar } from "./builderPageStatusBar";
 import { BuilderToolbar } from "./builderPageToolbar";
 import { useReadonly } from "@/contexts/ReadonlyContext";
 import type { EntityKind, SectionState, Selection } from "./builderPageTypes";
+import { useBuilderEntityHandlers } from "./useBuilderEntityHandlers";
 
 // ---------- Component ----------
 
@@ -175,157 +174,49 @@ const BuilderPage: React.FC = () => {
   const hasPendingNLDraft = nlStagedDraft !== null;
   const deployDisabled = readonlyLoading || isReadonly || hasPendingNLDraft;
 
-  // --- Entity CRUD handlers ---
-
-  const handleDeleteEntity = useCallback(
-    (kind: EntityKind, name: string, subType?: string) => {
-      switch (kind) {
-        case "model":
-          deleteModel(name);
-          break;
-        case "signal":
-          if (subType) deleteSignal(subType, name);
-          break;
-        case "projection-partition":
-          deleteProjectionPartition(name);
-          break;
-        case "projection-score":
-          deleteProjectionScore(name);
-          break;
-        case "projection-mapping":
-          deleteProjectionMapping(name);
-          break;
-        case "route":
-          deleteRoute(name);
-          break;
-        case "plugin":
-          if (subType) deletePlugin(name, subType);
-          break;
-      }
-      setSelection(null);
-    },
-    [
+  const {
+    handleDeleteEntity,
+    handleUpdateModelFields,
+    handleAddModel,
+    handleUpdateSignalFields,
+    handleUpdatePluginFields,
+    handleUpdateProjectionPartitionFields,
+    handleUpdateProjectionScoreFields,
+    handleUpdateProjectionMappingFields,
+    handleAddSignal,
+    handleAddPlugin,
+    handleAddProjectionPartition,
+    handleAddProjectionScore,
+    handleAddProjectionMapping,
+    handleUpdateRoute,
+    handleAddRoute,
+  } = useBuilderEntityHandlers({
+    actions: {
+      addModel,
       deleteModel,
+      mutateModel,
+      addSignal,
       deleteSignal,
-      deleteProjectionPartition,
-      deleteProjectionScore,
-      deleteProjectionMapping,
-      deleteRoute,
+      mutateSignal,
+      addPlugin,
       deletePlugin,
-    ],
-  );
-
-  const handleUpdateModelFields = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      mutateModel(name, fields);
+      mutatePlugin,
+      addProjectionPartition,
+      deleteProjectionPartition,
+      mutateProjectionPartition,
+      addProjectionScore,
+      deleteProjectionScore,
+      mutateProjectionScore,
+      addProjectionMapping,
+      deleteProjectionMapping,
+      mutateProjectionMapping,
+      addRoute,
+      deleteRoute,
+      mutateRoute,
     },
-    [mutateModel],
-  );
-
-  const handleAddModel = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      addModel(name, fields);
-      setSelection({ kind: "model", name });
-      setAddingEntity(null);
-    },
-    [addModel],
-  );
-
-  const handleUpdateSignalFields = useCallback(
-    (signalType: string, name: string, fields: DSLFieldObject) => {
-      mutateSignal(signalType, name, fields);
-    },
-    [mutateSignal],
-  );
-
-  const handleUpdatePluginFields = useCallback(
-    (name: string, pluginType: string, fields: DSLFieldObject) => {
-      mutatePlugin(name, pluginType, fields);
-    },
-    [mutatePlugin],
-  );
-
-  const handleUpdateProjectionPartitionFields = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      mutateProjectionPartition(name, fields);
-    },
-    [mutateProjectionPartition],
-  );
-
-  const handleUpdateProjectionScoreFields = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      mutateProjectionScore(name, fields);
-    },
-    [mutateProjectionScore],
-  );
-
-  const handleUpdateProjectionMappingFields = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      mutateProjectionMapping(name, fields);
-    },
-    [mutateProjectionMapping],
-  );
-
-  const handleAddSignal = useCallback(
-    (signalType: string, name: string, fields: DSLFieldObject) => {
-      addSignal(signalType, name, fields);
-      setSelection({ kind: "signal", name });
-      setAddingEntity(null);
-    },
-    [addSignal],
-  );
-
-  const handleAddPlugin = useCallback(
-    (name: string, pluginType: string, fields: DSLFieldObject) => {
-      addPlugin(name, pluginType, fields);
-      setSelection({ kind: "plugin", name });
-      setAddingEntity(null);
-    },
-    [addPlugin],
-  );
-
-  const handleAddProjectionPartition = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      addProjectionPartition(name, fields);
-      setSelection({ kind: "projection-partition", name });
-      setAddingEntity(null);
-    },
-    [addProjectionPartition],
-  );
-
-  const handleAddProjectionScore = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      addProjectionScore(name, fields);
-      setSelection({ kind: "projection-score", name });
-      setAddingEntity(null);
-    },
-    [addProjectionScore],
-  );
-
-  const handleAddProjectionMapping = useCallback(
-    (name: string, fields: DSLFieldObject) => {
-      addProjectionMapping(name, fields);
-      setSelection({ kind: "projection-mapping", name });
-      setAddingEntity(null);
-    },
-    [addProjectionMapping],
-  );
-
-  const handleUpdateRoute = useCallback(
-    (name: string, input: RouteInput) => {
-      mutateRoute(name, input);
-    },
-    [mutateRoute],
-  );
-
-  const handleAddRoute = useCallback(
-    (name: string, input: RouteInput) => {
-      addRoute(name, input);
-      setSelection({ kind: "route", name });
-      setAddingEntity(null);
-    },
-    [addRoute],
-  );
+    setSelection,
+    setAddingEntity,
+  });
 
   // --- Import Config handlers ---
 
