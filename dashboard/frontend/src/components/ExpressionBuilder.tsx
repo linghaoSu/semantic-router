@@ -52,6 +52,7 @@ import ExpressionBuilderContextMenu from './ExpressionBuilderContextMenu'
 import { AddChildPicker, EditSignalDialog } from './ExpressionBuilderDialogs'
 import { type BuilderTemplate, nodeTypes } from './ExpressionBuilderNodes'
 import ExpressionBuilderToolbox from './ExpressionBuilderToolbox'
+import { useExpressionBuilderHistory } from './useExpressionBuilderHistory'
 
 // ═══════════════════════════════════════════════════════════════
 // Inner component (needs ReactFlowProvider context)
@@ -588,40 +589,7 @@ const ExpressionBuilder: React.FC<ExpressionBuilderProps> = ({
   const [maximized, setMaximized] = useState(false)
   const [selectedPath, setSelectedPath] = useState<NodePath | null>(null)
 
-  // Undo / Redo history
-  const [history, setHistory] = useState<(RuleNode | null)[]>([])
-  const [historyIdx, setHistoryIdx] = useState(-1)
-  const skipHistoryRef = useRef(false)
-
-  const pushHistory = useCallback((prev: RuleNode | null) => {
-    if (skipHistoryRef.current) { skipHistoryRef.current = false; return }
-    setHistory(h => {
-      const trimmed = h.slice(0, historyIdx + 1)
-      return [...trimmed, prev].slice(-50)
-    })
-    setHistoryIdx(i => Math.min(i + 1, 49))
-  }, [historyIdx])
-
-  const canUndo = historyIdx >= 0
-  const canRedo = historyIdx < history.length - 1
-
-  const handleUndo = useCallback(() => {
-    if (!canUndo) return
-    skipHistoryRef.current = true
-    setHistory(h => {
-      const trimmed = h.slice(0, historyIdx + 1)
-      return [...trimmed, tree]
-    })
-    setTree(history[historyIdx])
-    setHistoryIdx(i => i - 1)
-  }, [canUndo, history, historyIdx, tree])
-
-  const handleRedo = useCallback(() => {
-    if (!canRedo) return
-    skipHistoryRef.current = true
-    setTree(history[historyIdx + 1])
-    setHistoryIdx(i => i + 1)
-  }, [canRedo, history, historyIdx])
+  const { pushHistory, canUndo, canRedo, handleUndo, handleRedo } = useExpressionBuilderHistory(tree, setTree)
 
   // Sync external value changes
   const prevValueRef = useRef(value)
