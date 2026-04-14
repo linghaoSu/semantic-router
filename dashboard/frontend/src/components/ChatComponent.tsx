@@ -13,7 +13,6 @@ import ChatTaskQueue from './ChatTaskQueue'
 import { runPlaygroundTask } from './chatTaskExecution'
 import {
   CLAW_MODE_STORAGE_KEY,
-  type ConversationPreview,
   generateConversationId,
   generateMessageId,
   generatePlaygroundTaskId,
@@ -23,8 +22,9 @@ import {
 import { useToolRegistry } from '../tools'
 import { isOpenClawMCPToolName, useMCPToolSync } from '../tools/mcp'
 import { ensureOpenClawServerConnected } from '../tools/mcp/api'
-import { useConversationStorage, usePlaygroundQueue } from '../hooks'
+import { usePlaygroundQueue } from '../hooks'
 import { useReadonly } from '../contexts/ReadonlyContext'
+import { useChatConversationStorage } from './useChatConversationStorage'
 
 interface ChatComponentProps {
   endpoint?: string
@@ -72,10 +72,15 @@ const ChatComponent = ({
   const conversationIdRef = useRef(conversationId)
   const conversationMessagesRef = useRef<Record<string, Message[]>>({})
 
-  const { conversations, saveConversation, getConversation, deleteConversation } = useConversationStorage<Message[]>({
-    storageKey: 'sr:chat:conversations',
-    maxConversations: 20,
-  })
+  const {
+    conversations,
+    saveConversation,
+    getConversation,
+    deleteConversation,
+    restoreMessages,
+    getStoredMessagesForConversation,
+    conversationPreviews,
+  } = useChatConversationStorage()
   const {
     clearConversationQueue,
     enqueueTask,
@@ -184,21 +189,6 @@ const ChatComponent = ({
     }
     delete abortControllersRef.current[targetConversationId]
   }, [])
-
-  const restoreMessages = useCallback((payload: Message[]) => {
-    return payload.map(message => ({
-      ...message,
-      timestamp: new Date(message.timestamp),
-    }))
-  }, [])
-
-  const getStoredMessagesForConversation = useCallback((id: string): Message[] => {
-    const storedConversation = getConversation(id)
-    if (!storedConversation?.payload || !Array.isArray(storedConversation.payload)) {
-      return []
-    }
-    return restoreMessages(storedConversation.payload)
-  }, [getConversation, restoreMessages])
 
   const updateConversationMessages = useCallback(
     (targetConversationId: string, updater: (prev: Message[]) => Message[]) => {
@@ -364,24 +354,6 @@ const ChatComponent = ({
       saveConversation(id, payload)
     })
   }, [conversationMessages, saveConversation])
-
-  const conversationPreviews = useMemo<ConversationPreview[]>(() => {
-    return [...conversations]
-      .sort((a, b) => a.createdAt - b.createdAt)
-      .map(conv => {
-        const firstUserMessage = Array.isArray(conv.payload)
-          ? conv.payload.find(msg => msg.role === 'user')
-          : undefined
-        const title = (firstUserMessage?.content || 'New conversation').trim()
-        const preview = title.length > 60 ? `${title.slice(0, 60)}…` : title || 'New conversation'
-
-        return {
-          id: conv.id,
-          updatedAt: conv.updatedAt || conv.createdAt,
-          preview,
-        }
-      })
-  }, [conversations])
 
   const messages = useMemo(
     () => conversationMessages[conversationId] ?? getStoredMessagesForConversation(conversationId),
